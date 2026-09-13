@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · Playlist-Wünsche 🎧</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0d0d12;
+    --panel:#17171f;
+    --neon:#ff3d7a;
+    --neon2:#4de3ff;
+    --gold:#ffcf5c;
+    --text:#f2f0f4;
+    --muted:#8b8896;
+    --line: rgba(242,240,244,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 700px 500px at 20% -10%, rgba(255,61,122,0.18), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 10%, rgba(77,227,255,0.14), transparent 60%),
+      var(--void);
+    color:var(--text);
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .admin-badge{
+    display:inline-block;
+    background:linear-gradient(100deg, var(--neon), #ff6f3d);
+    color:#1a0510;
+    font-size:0.72rem;
+    font-weight:700;
+    padding:4px 12px;
+    border-radius:999px;
+    margin-bottom:14px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+  header{
+    padding:40px 24px 30px;
+    text-align:center;
+  }
+  h1{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:clamp(2.6rem, 8vw, 3.6rem);
+    line-height:0.95;
+    margin:0 0 8px;
+    letter-spacing:0.02em;
+    background:linear-gradient(100deg, var(--neon), var(--gold) 55%, var(--neon2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  header p{
+    font-size:0.95rem;
+    color:var(--muted);
+    margin:0;
+  }
+
+  /* Equalizer signature element */
+  .eq{
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:5px;
+    height:36px;
+    margin:14px 0 4px;
+  }
+  .eq span{
+    width:5px;
+    border-radius:3px;
+    background:linear-gradient(180deg, var(--neon2), var(--neon));
+    animation: bounce 1.1s ease-in-out infinite;
+  }
+  .eq span:nth-child(1){ height:13px; animation-delay:0s; }
+  .eq span:nth-child(2){ height:26px; animation-delay:0.15s; }
+  .eq span:nth-child(3){ height:36px; animation-delay:0.3s; }
+  .eq span:nth-child(4){ height:20px; animation-delay:0.45s; }
+  .eq span:nth-child(5){ height:31px; animation-delay:0.6s; }
+  .eq span:nth-child(6){ height:12px; animation-delay:0.75s; }
+  .eq span:nth-child(7){ height:23px; animation-delay:0.9s; }
+  @keyframes bounce{
+    0%, 100%{ transform:scaleY(0.4); opacity:0.7; }
+    50%{ transform:scaleY(1); opacity:1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .eq span{ animation:none; transform:scaleY(0.7); }
+  }
+
+  main{
+    max-width:640px;
+    margin:0 auto;
+    padding:0 20px 80px;
+  }
+  .toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  .status-bar{
+    font-size:0.85rem;
+    color:var(--muted);
+    min-height:18px;
+  }
+  .summary{
+    font-size:0.9rem;
+    color:var(--muted);
+  }
+  .guest-group{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:18px 20px;
+    margin-bottom:14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .guest-group h3{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:1.05rem;
+    color:var(--text);
+    margin:0 0 10px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+  }
+  .guest-group h3 .count{
+    font-size:0.75rem;
+    color:var(--muted);
+    font-weight:400;
+  }
+  .track{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:8px 0;
+  }
+  .track + .track{
+    border-top:1px dashed var(--line);
+  }
+  .track .disc{
+    flex:none;
+    width:32px; height:32px;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at center, var(--void) 0 5px, var(--neon) 6px 7px, var(--panel) 7px 16px);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .track .info{ flex:1; min-width:0; }
+  .track .title{
+    font-weight:600;
+    font-size:1rem;
+    color:var(--text);
+    overflow-wrap:break-word;
+  }
+  .track .artist{
+    font-size:0.85rem;
+    color:var(--muted);
+    margin-top:1px;
+  }
+  .empty{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--muted);
+    font-style:italic;
+  }
+  .filter-input{
+    width:100%;
+    padding:13px 14px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,0.03);
+    font-family:'Space Grotesk', sans-serif;
+    font-size:0.95rem;
+    color:var(--text);
+    margin-bottom:16px;
+  }
+  .filter-input::placeholder{ color:rgba(242,240,244,0.28); }
+  .filter-input:focus-visible{
+    outline:2px solid var(--neon2);
+    outline-offset:1px;
+  }
+  .limit-panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:16px 18px;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .limit-panel label{
+    font-size:0.85rem;
+    color:var(--muted);
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .limit-panel input{
+    width:70px;
+    padding:9px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,0.03);
+    color:var(--text);
+    font-family:'Space Grotesk', sans-serif;
+    font-size:0.95rem;
+  }
+  .btn-small{
+    padding:9px 16px;
+    border-radius:10px;
+    border:none;
+    background:linear-gradient(100deg, var(--neon), #ff6f3d);
+    color:#1a0510;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:0.85rem;
+    font-weight:700;
+    cursor:pointer;
+    transition: transform 0.12s ease;
+  }
+  .btn-small:hover{ transform:translateY(-1px); }
+  .btn-small:active{ transform:scale(0.98); }
+  .btn-small.secondary{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--muted);
+  }
+  .btn-small.secondary:hover{ color:var(--text); border-color:var(--neon2); }
+  .btn-small:focus-visible, .limit-panel input:focus-visible{
+    outline:2px solid var(--neon2);
+    outline-offset:1px;
+  }
+  .guest-meta{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    font-size:0.8rem;
+    color:var(--muted);
+    margin-top:2px;
+  }
+  .pin-pill{
+    background:rgba(255,255,255,0.06);
+    color:var(--gold);
+    padding:2px 8px;
+    border-radius:6px;
+    font-family:monospace;
+    letter-spacing:0.05em;
+  }
+  .guest-actions{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+    flex-wrap:wrap;
+  }
+  .bonus-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    margin-top:8px;
+    flex-wrap:wrap;
+  }
+  .bonus-row input{
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,0.03);
+    color:var(--text);
+    font-family:'Space Grotesk', sans-serif;
+    font-size:0.85rem;
+  }
+  .bonus-row input.count{ width:60px; }
+  .bonus-row span{ color:var(--muted); }
+  .grant-note{
+    font-size:0.78rem;
+    color:var(--gold);
+    margin-top:6px;
+  }
+  .code-gate{
+    position:fixed;
+    inset:0;
+    background:
+      radial-gradient(ellipse 700px 500px at 20% -10%, rgba(255,61,122,0.18), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 10%, rgba(77,227,255,0.14), transparent 60%),
+      var(--void);
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:200;
+    padding:24px;
+  }
+  .code-card{
+    max-width:340px;
+    width:100%;
+    text-align:center;
+  }
+  .code-card h1{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:3rem;
+    margin:0 0 6px;
+    letter-spacing:0.02em;
+    background:linear-gradient(100deg, var(--neon), var(--gold) 55%, var(--neon2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .code-card p{
+    color:var(--muted);
+    margin:0 0 28px;
+  }
+  .code-digits{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+  }
+  .code-digits input{
+    width:52px;
+    height:60px;
+    text-align:center;
+    font-size:1.6rem;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,0.03);
+    color:var(--text);
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .code-digits input:focus-visible{
+    outline:2px solid var(--neon2);
+    outline-offset:1px;
+  }
+  .code-error{
+    color:var(--neon);
+    font-size:0.85rem;
+    margin-top:18px;
+    min-height:16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="code-gate" id="codeGate">
+  <div class="code-card">
+    <h1>Admin-Zugang</h1>
+    <p>Bitte Code eingeben</p>
+    <div class="eq" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="code-digits">
+      <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="code-digit" data-idx="0">
+      <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="code-digit" data-idx="1">
+      <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="code-digit" data-idx="2">
+      <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="code-digit" data-idx="3">
+    </div>
+    <div class="code-error" id="codeError"></div>
+  </div>
+</div>
+
+<div id="adminContent" style="display:none;">
+<header>
+  <span class="admin-badge">Admin-Ansicht</span>
+  <h1>Alle Wünsche</h1>
+  <p>Nur für dich – Übersicht aller Songwünsche</p>
+  <div class="eq" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <div class="status-bar" id="statusBar">verbinde …</div>
+    <div class="summary" id="summary"></div>
+  </div>
+  <div class="limit-panel">
+    <label for="limitInput">Songs pro Person:</label>
+    <input id="limitInput" type="number" min="1" max="50" value="3">
+    <button class="btn-small" id="saveLimitBtn">Speichern</button>
+  </div>
+  <input class="filter-input" id="filterInput" type="text" placeholder="Nach Name oder Song filtern …" autocomplete="off">
+  <div id="list"></div>
+</main>
+</div>
+
+<script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+<script>
+(function(){
+  const ABLY_KEY = "IUC-Ig.qxmWMQ:chvGoEpWoIoa1DjOt7o2TM5FLzKUhlJqAJTGXAY8ECs";
+  const CHANNEL_NAME = "playlist-geburtstag-2026";
+  const DEFAULT_LIMIT = 3;
+
+  const statusBar = document.getElementById('statusBar');
+  const summaryEl = document.getElementById('summary');
+  const listEl = document.getElementById('list');
+  const filterInput = document.getElementById('filterInput');
+  const limitInput = document.getElementById('limitInput');
+  const saveLimitBtn = document.getElementById('saveLimitBtn');
+
+  let tracks = []; // {id, title, artist, ts, guestName, guestPin}
+  let ably, channel;
+  let globalLimit = DEFAULT_LIMIT;
+  let pinResets = {}; // nameLower -> latest reset pin (newest wins, just for display)
+  let bonusGrants = []; // {id, nameLower, displayName, bonusPin, bonusCount, ts, usedBy:[]}
+
+  limitInput.value = globalLimit;
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function nameKey(name){
+    return (name || '').trim().toLowerCase();
+  }
+
+  function guestKey(name, pin){
+    return nameKey(name) + '|' + pin;
+  }
+
+  function randomPin(){
+    return String(Math.floor(1000 + Math.random() * 9000));
+  }
+
+  function randomBonusPin(){
+    return 'B' + String(Math.floor(1000 + Math.random() * 9000));
+  }
+
+  function publishAction(action){
+    action.ts = action.ts || Date.now();
+    applyAdminAction(action);
+    if(channel){
+      channel.publish('admin-action', action);
+    }
+  }
+
+  function applyAdminAction(action){
+    if(action.type === 'set-limit'){
+      globalLimit = action.limit;
+      limitInput.value = globalLimit;
+    }else if(action.type === 'reset-pin'){
+      pinResets[nameKey(action.name)] = action.newPin;
+    }else if(action.type === 'grant-bonus'){
+      bonusGrants.push({
+        id: action.id,
+        nameLower: nameKey(action.name),
+        displayName: action.name,
+        bonusPin: action.bonusPin,
+        bonusCount: action.bonusCount,
+        ts: action.ts,
+        usedBy: []
+      });
+    }else if(action.type === 'use-bonus'){
+      const grant = bonusGrants.find(g => g.id === action.grantId);
+      if(grant && !grant.usedBy.includes(action.guestKey)){
+        grant.usedBy.push(action.guestKey);
+      }
+    }
+    render();
+  }
+
+  function getCurrentPinFor(name, originalFirstPin){
+    return pinResets[nameKey(name)] || originalFirstPin;
+  }
+
+  function render(){
+    const filter = filterInput.value.trim().toLowerCase();
+
+    let filtered = tracks;
+    if(filter){
+      filtered = tracks.filter(t =>
+        (t.guestName || '').toLowerCase().includes(filter) ||
+        (t.title || '').toLowerCase().includes(filter) ||
+        (t.artist || '').toLowerCase().includes(filter)
+      );
+    }
+
+    summaryEl.textContent = tracks.length > 0
+      ? `${tracks.length} Wünsche von ${new Set(tracks.map(t => nameKey(t.guestName))).size} Gästen`
+      : '';
+
+    if(filtered.length === 0){
+      listEl.innerHTML = `<div class="empty">${tracks.length === 0 ? 'Noch keine Wünsche eingetragen 🎂' : 'Keine Treffer für diesen Filter'}</div>`;
+      return;
+    }
+
+    const groups = {};
+    filtered.forEach(t => {
+      const key = nameKey(t.guestName);
+      if(!groups[key]) groups[key] = { displayName: t.guestName || 'Unbekannt', firstPin: t.guestPin, items: [] };
+      groups[key].items.push(t);
+    });
+    const keys = Object.keys(groups).sort((a,b)=> groups[a].displayName.localeCompare(groups[b].displayName));
+
+    listEl.innerHTML = keys.map(key => {
+      const group = groups[key];
+      const items = group.items.sort((a,b)=> a.ts - b.ts);
+      const currentPin = getCurrentPinFor(group.displayName, group.firstPin);
+      const activeGrants = bonusGrants.filter(g => g.nameLower === key);
+      const bonusTotal = activeGrants.reduce((sum, g) => sum + (g.usedBy.length > 0 ? g.bonusCount : 0), 0);
+      const effectiveLimit = globalLimit + activeGrants.reduce((sum,g)=> g.usedBy.length > 0 ? sum + g.bonusCount : sum, 0);
+
+      return `
+        <div class="guest-group" data-namekey="${escapeHtml(key)}">
+          <h3>${escapeHtml(group.displayName)} <span class="count">${items.length} / ${effectiveLimit} Songs</span></h3>
+          <div class="guest-meta">
+            Aktuelle PIN: <span class="pin-pill">${escapeHtml(currentPin || '—')}</span>
+          </div>
+          <div class="guest-actions">
+            <button class="btn-small secondary" data-action="reset-pin" data-name="${escapeHtml(group.displayName)}">PIN zurücksetzen</button>
+            <button class="btn-small secondary" data-action="toggle-bonus" data-name="${escapeHtml(group.displayName)}" data-key="${escapeHtml(key)}">Bonus-PIN vergeben</button>
+          </div>
+          <div class="bonus-row hidden" data-bonus-panel="${escapeHtml(key)}" style="display:none;">
+            <input type="number" class="count" min="1" max="20" value="2" data-bonus-count>
+            <span style="font-size:0.82rem;">zusätzliche Songs</span>
+            <button class="btn-small" data-action="grant-bonus" data-name="${escapeHtml(group.displayName)}">Vergeben</button>
+          </div>
+          ${activeGrants.map(g => `
+            <div class="grant-note">Sonder-PIN <span class="pin-pill">${escapeHtml(g.bonusPin)}</span> (+${g.bonusCount}) ${g.usedBy.length > 0 ? '– bereits eingelöst' : '– noch nicht eingelöst'}</div>
+          `).join('')}
+        </div>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('[data-action="reset-pin"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.getAttribute('data-name');
+        if(!confirm(`PIN für ${name} wirklich zurücksetzen? Die Person muss sich danach neu anmelden.`)) return;
+        publishAction({ type: 'reset-pin', name, newPin: randomPin() });
+      });
+    });
+    listEl.querySelectorAll('[data-action="toggle-bonus"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-key');
+        const panel = listEl.querySelector(`[data-bonus-panel="${CSS.escape(key)}"]`);
+        if(panel) panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+      });
+    });
+    listEl.querySelectorAll('[data-action="grant-bonus"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.getAttribute('data-name');
+        const row = btn.closest('.bonus-row');
+        const count = parseInt(row.querySelector('[data-bonus-count]').value, 10) || 2;
+        const bonusPin = randomBonusPin();
+        publishAction({
+          type: 'grant-bonus',
+          id: 'grant_' + Math.random().toString(36).slice(2,10),
+          name,
+          bonusPin,
+          bonusCount: count
+        });
+        alert(`Sonder-PIN für ${name}: ${bonusPin} (erlaubt ${count} zusätzliche Songs)\n\nGib diese PIN direkt an ${name} weiter.`);
+      });
+    });
+  }
+
+  filterInput.addEventListener('input', render);
+
+  saveLimitBtn.addEventListener('click', () => {
+    const val = parseInt(limitInput.value, 10);
+    if(!val || val < 1){
+      limitInput.style.outline = '2px solid var(--clay)';
+      return;
+    }
+    limitInput.style.outline = '';
+    publishAction({ type: 'set-limit', limit: val });
+  });
+
+  function addTrackLocally(track){
+    if(tracks.some(t => t.id === track.id)) return;
+    tracks.push(track);
+    render();
+  }
+
+  function initAbly(){
+    try{
+      ably = new Ably.Realtime({ key: ABLY_KEY });
+    }catch(e){
+      statusBar.textContent = 'Ably konnte nicht geladen werden';
+      return;
+    }
+
+    ably.connection.on('connected', () => {
+      statusBar.textContent = 'live verbunden';
+      setTimeout(()=>{ if(statusBar.textContent === 'live verbunden') statusBar.textContent = ''; }, 2000);
+    });
+    ably.connection.on('disconnected', () => {
+      statusBar.textContent = 'Verbindung unterbrochen – versuche erneut …';
+    });
+    ably.connection.on('failed', () => {
+      statusBar.textContent = 'Verbindung fehlgeschlagen';
+    });
+
+    channel = ably.channels.get(CHANNEL_NAME);
+
+    channel.subscribe('new-track', (msg) => {
+      addTrackLocally(msg.data);
+    });
+    channel.subscribe('admin-action', (msg) => {
+      applyAdminAction(msg.data);
+    });
+
+    function loadHistory(){
+      channel.history((err, page) => {
+        if(err){
+          statusBar.textContent = 'Verlauf konnte nicht geladen werden';
+          return;
+        }
+        const historyTracks = [];
+        const historyActions = [];
+        const collect = (p) => {
+          p.items.forEach(item => {
+            if(item.name === 'new-track') historyTracks.push(item.data);
+            if(item.name === 'admin-action') historyActions.push(item.data);
+          });
+          if(p.hasNext()){
+            p.next((e, nextPage) => { if(!e) collect(nextPage); });
+          }
+        };
+        collect(page);
+        historyTracks.forEach(addTrackLocally);
+        historyActions.sort((a,b) => (a.ts||0) - (b.ts||0));
+        historyActions.forEach(applyAdminAction);
+      });
+    }
+
+    channel.attach((err) => {
+      if(err){
+        statusBar.textContent = 'Konnte keine Verbindung zum Kanal herstellen';
+        return;
+      }
+      loadHistory();
+    });
+  }
+
+  render();
+
+  function startAblyConnection(){
+    if(typeof Ably === 'undefined'){
+      statusBar.textContent = 'Ably lädt noch …';
+      let attempts = 0;
+      const waitForAbly = setInterval(() => {
+        attempts++;
+        if(typeof Ably !== 'undefined'){
+          clearInterval(waitForAbly);
+          initAbly();
+        }else if(attempts > 40){
+          clearInterval(waitForAbly);
+          statusBar.textContent = 'Ably nicht verfügbar – neu laden versuchen';
+        }
+      }, 150);
+    }else{
+      initAbly();
+    }
+  }
+
+  // --- Code gate ---
+  const ADMIN_CODE = '1234';
+  const codeGate = document.getElementById('codeGate');
+  const adminContent = document.getElementById('adminContent');
+  const codeError = document.getElementById('codeError');
+  const digitInputs = Array.from(document.querySelectorAll('.code-digit'));
+
+  function checkCode(){
+    const entered = digitInputs.map(inp => inp.value).join('');
+    if(entered.length < 4) return;
+    if(entered === ADMIN_CODE){
+      codeGate.style.display = 'none';
+      adminContent.style.display = 'block';
+      startAblyConnection();
+    }else{
+      codeError.textContent = 'Falscher Code.';
+      digitInputs.forEach(inp => { inp.value = ''; inp.style.outline = '2px solid var(--clay)'; });
+      digitInputs[0].focus();
+    }
+  }
+
+  digitInputs.forEach((inp, i) => {
+    inp.addEventListener('input', () => {
+      inp.value = inp.value.replace(/\D/g, '').slice(0,1);
+      inp.style.outline = '';
+      codeError.textContent = '';
+      if(inp.value && i < digitInputs.length - 1){
+        digitInputs[i+1].focus();
+      }
+      checkCode();
+    });
+    inp.addEventListener('keydown', (e) => {
+      if(e.key === 'Backspace' && !inp.value && i > 0){
+        digitInputs[i-1].focus();
+      }
+    });
+  });
+
+  digitInputs[0].focus();
+})();
+</script>
+</body>
+</html>

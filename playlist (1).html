@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Songwunsch 🎶</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0d0d12;
+    --panel:#17171f;
+    --neon:#ff3d7a;
+    --neon2:#4de3ff;
+    --gold:#ffcf5c;
+    --text:#f2f0f4;
+    --muted:#8b8896;
+    --line: rgba(242,240,244,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 700px 500px at 20% -10%, rgba(255,61,122,0.18), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 10%, rgba(77,227,255,0.14), transparent 60%),
+      var(--void);
+    color:var(--text);
+    font-family:'Space Grotesk', sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .card{
+    width:100%;
+    max-width:440px;
+  }
+  .eyebrow{
+    font-size:0.75rem;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+    text-align:center;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:clamp(3rem, 11vw, 4.2rem);
+    line-height:0.95;
+    text-align:center;
+    margin:0 0 6px;
+    letter-spacing:0.02em;
+    background:linear-gradient(100deg, var(--neon), var(--gold) 55%, var(--neon2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .sub{
+    text-align:center;
+    color:var(--muted);
+    font-size:0.95rem;
+    margin:0 0 28px;
+  }
+
+  /* Equalizer signature element */
+  .eq{
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:5px;
+    height:44px;
+    margin:0 0 28px;
+  }
+  .eq span{
+    width:5px;
+    border-radius:3px;
+    background:linear-gradient(180deg, var(--neon2), var(--neon));
+    animation: bounce 1.1s ease-in-out infinite;
+  }
+  .eq span:nth-child(1){ height:16px; animation-delay:0s; }
+  .eq span:nth-child(2){ height:32px; animation-delay:0.15s; }
+  .eq span:nth-child(3){ height:44px; animation-delay:0.3s; }
+  .eq span:nth-child(4){ height:24px; animation-delay:0.45s; }
+  .eq span:nth-child(5){ height:38px; animation-delay:0.6s; }
+  .eq span:nth-child(6){ height:14px; animation-delay:0.75s; }
+  .eq span:nth-child(7){ height:28px; animation-delay:0.9s; }
+  @keyframes bounce{
+    0%, 100%{ transform:scaleY(0.4); opacity:0.7; }
+    50%{ transform:scaleY(1); opacity:1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .eq span{ animation:none; transform:scaleY(0.7); }
+  }
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:26px 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  label{
+    display:block;
+    font-size:0.72rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 7px;
+  }
+  label:not(:first-child){ margin-top:18px; }
+  input{
+    width:100%;
+    padding:13px 14px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,0.03);
+    color:var(--text);
+    font-family:'Space Grotesk', sans-serif;
+    font-size:1rem;
+  }
+  input::placeholder{ color:rgba(242,240,244,0.28); }
+  input:focus-visible{
+    outline:2px solid var(--neon2);
+    outline-offset:1px;
+  }
+  .required-hint{
+    color:var(--muted);
+    font-size:0.72rem;
+    margin-top:4px;
+  }
+
+  button.send{
+    width:100%;
+    margin-top:24px;
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(100deg, var(--neon), #ff6f3d);
+    color:#1a0510;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:1rem;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    box-shadow: 0 8px 24px rgba(255,61,122,0.28);
+  }
+  button.send:hover{ transform:translateY(-1px); }
+  button.send:active{ transform:scale(0.98); }
+  button.send:disabled{
+    opacity:0.55;
+    cursor:not-allowed;
+    transform:none;
+  }
+
+  .status{
+    text-align:center;
+    font-size:0.88rem;
+    margin-top:16px;
+    min-height:20px;
+  }
+  .status.ok{ color:var(--neon2); }
+  .status.err{ color:var(--neon); }
+
+  .again-btn{
+    display:block;
+    margin:14px auto 0;
+    background:none;
+    border:1px solid var(--line);
+    color:var(--muted);
+    padding:9px 16px;
+    border-radius:999px;
+    font-size:0.82rem;
+    cursor:pointer;
+  }
+  .again-btn:hover{ color:var(--text); border-color: var(--neon2); }
+
+  /* --- Login screen --- */
+  .login-screen{
+    width:100%;
+  }
+  .login-screen .panel{ text-align:left; }
+  .login-error{
+    color:var(--neon);
+    font-size:0.85rem;
+    margin-top:12px;
+    min-height:16px;
+    text-align:center;
+  }
+
+  /* --- Whoami / my wishes --- */
+  .whoami{
+    text-align:center;
+    font-size:0.82rem;
+    color:var(--muted);
+    margin-bottom:16px;
+  }
+  .whoami button{
+    background:none;
+    border:none;
+    color:var(--neon2);
+    text-decoration:underline;
+    cursor:pointer;
+    font-size:0.82rem;
+    padding:0;
+  }
+  .limit-note{
+    text-align:center;
+    font-size:0.8rem;
+    color:var(--muted);
+    margin-bottom:16px;
+  }
+  .mine{
+    margin-bottom:22px;
+  }
+  .mine .track{
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .mine .track .title{ font-weight:600; font-size:0.95rem; }
+  .mine .track .artist{ color:var(--muted); font-size:0.82rem; margin-top:2px; }
+  .mine .track .num{ color:var(--gold); font-size:0.78rem; flex:none; }
+  .mine .empty{
+    text-align:center;
+    color:var(--muted);
+    font-size:0.85rem;
+    padding:14px 0;
+  }
+
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- LOGIN SCREEN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="eyebrow">Heute Abend</div>
+    <h1>Songwunsch</h1>
+    <p class="sub">Meld dich mit Namen &amp; PIN an, um Wünsche einzutragen.</p>
+
+    <div class="eq" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="panel">
+      <label for="loginNameInput">Dein Name</label>
+      <input id="loginNameInput" type="text" placeholder="z. B. Mia" maxlength="40" autocomplete="off">
+
+      <label for="loginPinInput">Deine PIN (4-stellig, frei wählbar)</label>
+      <input id="loginPinInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="z. B. 4711" maxlength="4" autocomplete="off">
+
+      <div class="login-error" id="loginError"></div>
+      <button class="send" id="loginBtn" type="button">Loslegen</button>
+    </div>
+  </div>
+
+  <!-- MAIN (WISH) SCREEN -->
+  <div id="mainScreen" class="hidden">
+    <div class="eyebrow">Heute Abend</div>
+    <h1>Songwunsch</h1>
+    <p class="sub">Trag deinen Track ein — er landet direkt bei der DJ-Kanzel.</p>
+
+    <div class="eq" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="whoami" id="whoami"></div>
+    <div class="limit-note" id="limitNote"></div>
+
+    <div class="mine" id="mineList"></div>
+
+    <div class="panel" id="bonusPanel" style="display:none;">
+      <p style="margin:0 0 6px; color:var(--muted); font-size:0.88rem;">Du hast dein Songlimit erreicht. Gib die Sonder-PIN vom Gastgeber ein, um weiterzumachen.</p>
+      <label for="bonusPinInput">Sonder-PIN</label>
+      <input id="bonusPinInput" type="text" placeholder="Sonder-PIN" maxlength="10" autocomplete="off">
+      <button class="send" id="bonusConfirmBtn" type="button">Weiter</button>
+      <div class="status" id="bonusStatus"></div>
+    </div>
+
+    <div class="panel" id="wishPanel">
+      <form id="wishForm">
+        <label for="titleInput">Songtitel</label>
+        <input id="titleInput" name="title" type="text" placeholder="z. B. Blinding Lights" maxlength="120" autocomplete="off" required>
+
+        <label for="artistInput">Künstler</label>
+        <input id="artistInput" name="artist" type="text" placeholder="z. B. The Weeknd" maxlength="120" autocomplete="off" required>
+
+        <button class="send" id="sendBtn" type="submit">Wunsch senden</button>
+        <div class="status" id="statusMsg"></div>
+        <button class="again-btn hidden" id="againBtn" type="button">Noch einen Song eintragen</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+<script>
+(function(){
+  const ACCESS_KEY = "bd2d143a-9fc3-420d-89df-101a7a3b0eff";
+  const ABLY_KEY = "IUC-Ig.qxmWMQ:chvGoEpWoIoa1DjOt7o2TM5FLzKUhlJqAJTGXAY8ECs";
+  const CHANNEL_NAME = "playlist-geburtstag-2026";
+  const STORAGE_KEY = "playlist_wunsch_identity";
+  const MINE_STORAGE_PREFIX = "playlist_wunsch_mine_";
+  const DEFAULT_LIMIT = 3;
+
+  // --- Elements ---
+  const loginScreen = document.getElementById('loginScreen');
+  const mainScreen = document.getElementById('mainScreen');
+  const loginNameInput = document.getElementById('loginNameInput');
+  const loginPinInput = document.getElementById('loginPinInput');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginError = document.getElementById('loginError');
+
+  const whoami = document.getElementById('whoami');
+  const limitNote = document.getElementById('limitNote');
+  const mineList = document.getElementById('mineList');
+
+  const bonusPanel = document.getElementById('bonusPanel');
+  const bonusPinInput = document.getElementById('bonusPinInput');
+  const bonusConfirmBtn = document.getElementById('bonusConfirmBtn');
+  const bonusStatus = document.getElementById('bonusStatus');
+
+  const wishPanel = document.getElementById('wishPanel');
+  const form = document.getElementById('wishForm');
+  const titleInput = document.getElementById('titleInput');
+  const artistInput = document.getElementById('artistInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const statusMsg = document.getElementById('statusMsg');
+  const againBtn = document.getElementById('againBtn');
+
+  // --- State ---
+  let currentName = null;
+  let currentPin = null;
+  let tracks = []; // {id, title, artist, ts, guestName, guestPin}
+  let globalLimit = DEFAULT_LIMIT;
+  let pinByName = {};
+  let bonusGrants = []; // {id, nameLower, bonusPin, bonusCount, ts, usedBy: []}
+  let unlockedGrantId = null;
+  let ably, channel;
+  let isSubmitting = false;
+
+  // --- Local persistence for "my wishes" (survives reload even if Ably history is short) ---
+  function mineStorageKey(name, pin){ return MINE_STORAGE_PREFIX + guestKey(name, pin); }
+  function loadMineFromStorage(name, pin){
+    try{
+      const raw = localStorage.getItem(mineStorageKey(name, pin));
+      if(!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    }catch(e){ return []; }
+  }
+  function saveMineToStorage(name, pin){
+    try{
+      const mine = tracks.filter(t => guestKey(t.guestName, t.guestPin) === guestKey(name, pin));
+      localStorage.setItem(mineStorageKey(name, pin), JSON.stringify(mine));
+    }catch(e){ /* storage full or unavailable, ignore */ }
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+  function nameKey(name){ return (name || '').trim().toLowerCase(); }
+  function guestKey(name, pin){ return nameKey(name) + '|' + pin; }
+
+  function getEffectiveLimitFor(name, pin){
+    let limit = globalLimit;
+    bonusGrants.forEach(g => {
+      if(g.nameLower === nameKey(name) && g.usedBy && g.usedBy.includes(guestKey(name, pin))){
+        limit += g.bonusCount;
+      }
+    });
+    return limit;
+  }
+
+  // --- Rendering ---
+  function renderMine(){
+    if(!currentName) return;
+    const mine = tracks.filter(t => guestKey(t.guestName, t.guestPin) === guestKey(currentName, currentPin));
+    if(mine.length === 0){
+      mineList.innerHTML = '<div class="empty">Du hast noch keine Wünsche eingetragen 🎶</div>';
+    }else{
+      const sorted = [...mine].sort((a,b)=> a.ts - b.ts);
+      mineList.innerHTML = sorted.map((t, i) => `
+        <div class="track">
+          <div class="info">
+            <div class="title">${escapeHtml(t.title)}</div>
+            <div class="artist">${escapeHtml(t.artist)}</div>
+          </div>
+          <div class="num">#${i+1}</div>
+        </div>
+      `).join('');
+    }
+    const limit = getEffectiveLimitFor(currentName, currentPin);
+    limitNote.textContent = `${mine.length} von ${limit} Songs verwendet`;
+    updateFormAvailability();
+  }
+
+  function updateFormAvailability(){
+    if(!currentName) return;
+    const mineCount = tracks.filter(t => guestKey(t.guestName, t.guestPin) === guestKey(currentName, currentPin)).length;
+    const limit = getEffectiveLimitFor(currentName, currentPin);
+    if(mineCount >= limit && !unlockedGrantId){
+      bonusPanel.style.display = 'block';
+      wishPanel.style.display = 'none';
+    }else{
+      bonusPanel.style.display = 'none';
+      wishPanel.style.display = 'block';
+    }
+  }
+
+  function addTrackLocally(track){
+    if(tracks.some(t => t.id === track.id)) return;
+    tracks.push(track);
+    if(currentName && currentPin && guestKey(track.guestName, track.guestPin) === guestKey(currentName, currentPin)){
+      saveMineToStorage(currentName, currentPin);
+    }
+    renderMine();
+  }
+
+  function applyAdminAction(action){
+    if(action.type === 'set-limit'){
+      globalLimit = action.limit;
+    }else if(action.type === 'reset-pin'){
+      pinByName[nameKey(action.name)] = action.newPin;
+      if(currentName && nameKey(currentName) === nameKey(action.name) && currentPin !== action.newPin){
+        logout('Deine PIN wurde vom Gastgeber zurückgesetzt. Bitte neu anmelden.');
+      }
+    }else if(action.type === 'grant-bonus'){
+      bonusGrants.push({
+        id: action.id,
+        nameLower: nameKey(action.name),
+        bonusPin: action.bonusPin,
+        bonusCount: action.bonusCount,
+        ts: action.ts,
+        usedBy: []
+      });
+    }else if(action.type === 'use-bonus'){
+      const grant = bonusGrants.find(g => g.id === action.grantId);
+      if(grant && !grant.usedBy.includes(action.guestKey)){
+        grant.usedBy.push(action.guestKey);
+      }
+    }
+    renderMine();
+  }
+
+  // --- Login flow ---
+  function tryLogin(){
+    const name = loginNameInput.value.trim();
+    const pin = loginPinInput.value.trim();
+    if(!name){
+      loginError.textContent = 'Bitte gib deinen Namen ein.';
+      return;
+    }
+    if(!/^\d{4}$/.test(pin)){
+      loginError.textContent = 'Die PIN muss aus genau 4 Ziffern bestehen.';
+      return;
+    }
+    currentName = name;
+    currentPin = pin;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ name, pin }));
+    loginScreen.classList.add('hidden');
+    mainScreen.classList.remove('hidden');
+    loginError.textContent = '';
+    loadMineFromStorage(currentName, currentPin).forEach(addTrackLocally);
+    updateWhoami();
+    renderMine();
+  }
+
+  function updateWhoami(){
+    whoami.innerHTML = `Angemeldet als <strong>${escapeHtml(currentName)}</strong> · <button id="switchUserBtn">nicht du?</button>`;
+    document.getElementById('switchUserBtn').addEventListener('click', () => logout());
+  }
+
+  function logout(message){
+    localStorage.removeItem(STORAGE_KEY);
+    currentName = null;
+    currentPin = null;
+    unlockedGrantId = null;
+    loginNameInput.value = '';
+    loginPinInput.value = '';
+    loginError.textContent = message || '';
+    mainScreen.classList.add('hidden');
+    loginScreen.classList.remove('hidden');
+  }
+
+  loginBtn.addEventListener('click', tryLogin);
+  loginPinInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') tryLogin(); });
+  loginPinInput.addEventListener('input', () => {
+    loginPinInput.value = loginPinInput.value.replace(/\D/g, '').slice(0,4);
+  });
+
+  // Restore saved identity
+  (function(){
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if(saved){
+      try{
+        const parsed = JSON.parse(saved);
+        if(parsed.name && parsed.pin){
+          currentName = parsed.name;
+          currentPin = parsed.pin;
+          loginNameInput.value = parsed.name;
+          loginPinInput.value = parsed.pin;
+          loginScreen.classList.add('hidden');
+          mainScreen.classList.remove('hidden');
+          loadMineFromStorage(currentName, currentPin).forEach(addTrackLocally);
+          updateWhoami();
+          renderMine();
+        }
+      }catch(e){ /* ignore */ }
+    }
+  })();
+
+  // --- Bonus PIN unlock ---
+  bonusConfirmBtn.addEventListener('click', () => {
+    const enteredBonusPin = bonusPinInput.value.trim();
+    const matchingGrant = bonusGrants.find(g =>
+      g.nameLower === nameKey(currentName) &&
+      g.bonusPin === enteredBonusPin &&
+      !g.usedBy.includes(guestKey(currentName, currentPin))
+    );
+    if(!matchingGrant){
+      bonusStatus.textContent = 'Sonder-PIN nicht gültig.';
+      bonusStatus.className = 'status err';
+      return;
+    }
+    unlockedGrantId = matchingGrant.id;
+    bonusStatus.textContent = '';
+    bonusStatus.className = 'status';
+    bonusPinInput.value = '';
+    updateFormAvailability();
+    titleInput.focus();
+  });
+
+  // --- Wish form / send ---
+  function resetForm(){
+    form.reset();
+    wishPanel.style.display = 'block';
+    againBtn.classList.add('hidden');
+    titleInput.closest('label').style.display = 'block';
+    titleInput.style.display = 'block';
+    artistInput.closest('label').style.display = 'block';
+    artistInput.style.display = 'block';
+    sendBtn.style.display = 'block';
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Wunsch senden';
+    statusMsg.textContent = '';
+    statusMsg.className = 'status';
+    unlockedGrantId = null;
+    updateFormAvailability();
+    titleInput.focus();
+  }
+  againBtn.addEventListener('click', resetForm);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if(isSubmitting) return; // hard guard: ignore double-clicks / double Enter presses
+
+    const title = titleInput.value.trim();
+    const artist = artistInput.value.trim();
+
+    if(!title || !artist){
+      statusMsg.textContent = 'Bitte Songtitel und Künstler ausfüllen.';
+      statusMsg.className = 'status err';
+      return;
+    }
+    if(!currentName || !currentPin){
+      logout();
+      return;
+    }
+
+    const mineCount = tracks.filter(t => guestKey(t.guestName, t.guestPin) === guestKey(currentName, currentPin)).length;
+    const limit = getEffectiveLimitFor(currentName, currentPin);
+    if(mineCount >= limit && !unlockedGrantId){
+      updateFormAvailability();
+      return;
+    }
+
+    isSubmitting = true;
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Wird gesendet …';
+    statusMsg.textContent = '';
+    statusMsg.className = 'status';
+
+    const usedGrantId = unlockedGrantId;
+    const name = currentName;
+
+    // 1) Publish to Ably so it counts toward the shared limit / shows in admin & "my wishes"
+    const track = {
+      id: 'trk_' + Math.random().toString(36).slice(2,10) + '_' + Date.now(),
+      title,
+      artist,
+      ts: Date.now(),
+      guestName: currentName,
+      guestPin: currentPin
+    };
+
+    // 2) Also send via Web3Forms mail
+    const payload = {
+      access_key: ACCESS_KEY,
+      subject: `Neuer Songwunsch: ${title} – ${artist}`,
+      from_name: name,
+      title: title,
+      artist: artist,
+      name: name,
+      message: `Songwunsch für heute Abend:\n\nTitel: ${title}\nKünstler: ${artist}\nVon: ${name}`
+    };
+
+    let mailOk = false;
+    try{
+      try{
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        const data = await res.json();
+        mailOk = !!data.success;
+      }catch(err){
+        mailOk = false;
+      }
+
+      addTrackLocally(track);
+      if(channel){
+        channel.publish('new-track', track);
+        if(usedGrantId){
+          const action = {
+            type: 'use-bonus',
+            grantId: usedGrantId,
+            guestKey: guestKey(currentName, currentPin),
+            ts: Date.now()
+          };
+          applyAdminAction(action);
+          channel.publish('admin-action', action);
+        }
+      }
+
+      if(mailOk){
+        statusMsg.textContent = 'Danke! Dein Wunsch ist unterwegs 🎧';
+        statusMsg.className = 'status ok';
+      }else{
+        statusMsg.textContent = 'Wunsch eingetragen, Mail-Versand hat aber nicht geklappt.';
+        statusMsg.className = 'status err';
+      }
+      titleInput.closest('label').style.display = 'none';
+      titleInput.style.display = 'none';
+      artistInput.closest('label').style.display = 'none';
+      artistInput.style.display = 'none';
+      sendBtn.style.display = 'none';
+      againBtn.classList.remove('hidden');
+    }finally{
+      isSubmitting = false;
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Wunsch senden';
+    }
+  });
+
+  // --- Ably ---
+  function initAbly(){
+    try{
+      ably = new Ably.Realtime({ key: ABLY_KEY });
+    }catch(e){
+      return;
+    }
+    channel = ably.channels.get(CHANNEL_NAME);
+
+    channel.subscribe('new-track', (msg) => addTrackLocally(msg.data));
+    channel.subscribe('admin-action', (msg) => applyAdminAction(msg.data));
+
+    function loadHistory(){
+      channel.history((err, page) => {
+        if(err) return;
+        const historyTracks = [];
+        const historyActions = [];
+        const collect = (p) => {
+          p.items.forEach(item => {
+            if(item.name === 'new-track') historyTracks.push(item.data);
+            if(item.name === 'admin-action') historyActions.push(item.data);
+          });
+          if(p.hasNext()){
+            p.next((e, nextPage) => { if(!e) collect(nextPage); });
+          }
+        };
+        collect(page);
+        historyTracks.forEach(addTrackLocally);
+        historyActions.sort((a,b) => (a.ts||0) - (b.ts||0));
+        historyActions.forEach(applyAdminAction);
+      });
+    }
+
+    channel.attach((err) => {
+      if(err) return;
+      loadHistory();
+    });
+  }
+
+  if(typeof Ably === 'undefined'){
+    let attempts = 0;
+    const waitForAbly = setInterval(() => {
+      attempts++;
+      if(typeof Ably !== 'undefined'){
+        clearInterval(waitForAbly);
+        initAbly();
+      }else if(attempts > 40){
+        clearInterval(waitForAbly);
+      }
+    }, 150);
+  }else{
+    initAbly();
+  }
+})();
+</script>
+</body>
+</html>
