@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playlist-Wünsche 🎂🎵</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0d0d12;
+    --panel:#17171f;
+    --neon:#ff3d7a;
+    --neon2:#4de3ff;
+    --gold:#ffcf5c;
+    --text:#f2f0f4;
+    --muted:#8b8896;
+    --line: rgba(242,240,244,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 700px 500px at 20% -10%, rgba(255,61,122,0.18), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 10%, rgba(77,227,255,0.14), transparent 60%),
+      var(--void);
+    color:var(--text);
+    font-family:'Space Grotesk', sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .card{
+    width:100%;
+    max-width:440px;
+  }
+  .eyebrow{
+    font-size:0.75rem;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+    text-align:center;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:clamp(3rem, 11vw, 4.2rem);
+    line-height:0.95;
+    text-align:center;
+    margin:0 0 6px;
+    letter-spacing:0.02em;
+    background:linear-gradient(100deg, var(--neon), var(--gold) 55%, var(--neon2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .sub{
+    text-align:center;
+    color:var(--muted);
+    font-size:0.95rem;
+    margin:0 0 28px;
+  }
+
+  /* Cake candle row — signature element, replaces the equalizer bars */
+  .candles{
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:14px;
+    height:44px;
+    margin:0 0 28px;
+    font-size:1.5rem;
+  }
+  .candles span{
+    animation: flicker 1.6s ease-in-out infinite;
+    filter: drop-shadow(0 0 6px rgba(255,207,92,0.55));
+  }
+  .candles span:nth-child(1){ animation-delay:0s; }
+  .candles span:nth-child(2){ animation-delay:0.3s; }
+  .candles span:nth-child(3){ animation-delay:0.6s; }
+  .candles span:nth-child(4){ animation-delay:0.9s; }
+  .candles span:nth-child(5){ animation-delay:1.2s; }
+  @keyframes flicker{
+    0%, 100%{ transform:scale(1) rotate(0deg); opacity:0.85; }
+    50%{ transform:scale(1.15) rotate(-4deg); opacity:1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .candles span{ animation:none; }
+  }
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:22px 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .links{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  a.btn{
+    display:block;
+    padding:16px 18px;
+    border-radius:12px;
+    text-decoration:none;
+    font-family:'Space Grotesk', sans-serif;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  a.btn:active{ transform:scale(0.98); }
+  a.btn.primary{
+    background:linear-gradient(100deg, var(--neon), #ff6f3d);
+    color:#1a0510;
+    font-weight:700;
+    box-shadow: 0 8px 24px rgba(255,61,122,0.28);
+  }
+  a.btn.primary:hover{ transform:translateY(-1px); }
+  a.btn.secondary{
+    background:rgba(255,255,255,0.03);
+    color:var(--text);
+    border:1px solid var(--line);
+  }
+  a.btn.secondary:hover{ border-color:var(--neon2); }
+  a.btn .emoji{
+    font-size:1.2rem;
+    margin-right:8px;
+    vertical-align:-2px;
+  }
+  a.btn .label{
+    display:block;
+    font-weight:700;
+    font-size:1rem;
+  }
+  a.btn.secondary .label{ font-weight:600; }
+  a.btn .hint{
+    display:block;
+    font-size:0.78rem;
+    font-weight:400;
+    opacity:0.75;
+    margin-top:3px;
+  }
+  a.btn:focus-visible{
+    outline:2px solid var(--neon2);
+    outline-offset:2px;
+  }
+
+  .sprinkles{
+    text-align:center;
+    font-size:1.1rem;
+    letter-spacing:10px;
+    margin:22px 0 6px;
+    opacity:0.6;
+  }
+  footer{
+    text-align:center;
+    margin-top:8px;
+    font-size:0.78rem;
+    color:var(--muted);
+    opacity:0.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="eyebrow">Heute Abend</div>
+  <h1>Playlist-Wünsche</h1>
+  <p class="sub">Was soll auf der Party laufen? 🎂</p>
+
+  <div class="candles" aria-hidden="true">
+    <span>🎂</span><span>🎉</span><span>🎵</span><span>🎈</span><span>🎂</span>
+  </div>
+
+  <div class="panel">
+    <div class="links">
+      <a class="btn primary" href="playlist.html">
+        <span class="label"><span class="emoji">🎶</span>Song eintragen</span>
+        <span class="hint">Für alle Gäste</span>
+      </a>
+      <a class="btn secondary" href="admin.html">
+        <span class="label"><span class="emoji">🎂</span>Admin-Ansicht</span>
+        <span class="hint">Nur für den Gastgeber</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="sprinkles">🎂 · 🎉 · 🎈 · 🎵 · 🎂</div>
+  <footer>playlist-geburtstag-2026</footer>
+</div>
+
+</body>
+</html>
