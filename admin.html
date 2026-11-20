@@ -394,6 +394,7 @@
 </div>
 
 <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+<script src="wunsch-sync.js"></script>
 <script>
 (function(){
   const ABLY_KEY = "IUC-Ig.qxmWMQ:chvGoEpWoIoa1DjOt7o2TM5FLzKUhlJqAJTGXAY8ECs";
@@ -408,7 +409,7 @@
   const saveLimitBtn = document.getElementById('saveLimitBtn');
 
   let tracks = []; // {id, title, artist, ts, guestName, guestPin}
-  let ably, channel;
+  let ably, sync;
   let globalLimit = DEFAULT_LIMIT;
   let pinResets = {}; // nameLower -> latest reset pin (newest wins, just for display)
   let bonusGrants = []; // {id, nameLower, displayName, bonusPin, bonusCount, ts, usedBy:[]}
@@ -440,8 +441,8 @@
   function publishAction(action){
     action.ts = action.ts || Date.now();
     applyAdminAction(action);
-    if(channel){
-      channel.publish('admin-action', action);
+    if(sync){
+      sync.publish('admin-action', action);
     }
   }
 
@@ -602,45 +603,15 @@
       statusBar.textContent = 'Verbindung fehlgeschlagen';
     });
 
-    channel = ably.channels.get(CHANNEL_NAME);
-
-    channel.subscribe('new-track', (msg) => {
-      addTrackLocally(msg.data);
-    });
-    channel.subscribe('admin-action', (msg) => {
-      applyAdminAction(msg.data);
-    });
-
-    function loadHistory(){
-      channel.history((err, page) => {
-        if(err){
-          statusBar.textContent = 'Verlauf konnte nicht geladen werden';
-          return;
-        }
-        const historyTracks = [];
-        const historyActions = [];
-        const collect = (p) => {
-          p.items.forEach(item => {
-            if(item.name === 'new-track') historyTracks.push(item.data);
-            if(item.name === 'admin-action') historyActions.push(item.data);
-          });
-          if(p.hasNext()){
-            p.next((e, nextPage) => { if(!e) collect(nextPage); });
-          }
-        };
-        collect(page);
-        historyTracks.forEach(addTrackLocally);
-        historyActions.sort((a,b) => (a.ts||0) - (b.ts||0));
-        historyActions.forEach(applyAdminAction);
-      });
-    }
-
-    channel.attach((err) => {
-      if(err){
+    // Wünsche + Aktionen aus lokaler Kopie, letztem Stand und komplettem Verlauf (siehe wunsch-sync.js)
+    sync = WunschSync(ably, CHANNEL_NAME, {
+      onEvent(name, data){
+        if(name === 'new-track') addTrackLocally(data);
+        else if(name === 'admin-action') applyAdminAction(data);
+      },
+      onError(){
         statusBar.textContent = 'Konnte keine Verbindung zum Kanal herstellen';
-        return;
       }
-      loadHistory();
     });
   }
 

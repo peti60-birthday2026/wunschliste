@@ -460,6 +460,7 @@
 
 <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="wunsch-sync.js"></script>
 <script>
 (function(){
   const ABLY_KEY = "IUC-Ig.qxmWMQ:chvGoEpWoIoa1DjOt7o2TM5FLzKUhlJqAJTGXAY8ECs";
@@ -903,29 +904,19 @@
     if(!track || !track.id || tracks.some(t => t.id === track.id)) return;
     tracks.push(track);
   }
-  function loadAllHistory(channel, cb){
-    const items = [];
-    channel.history({ limit: 1000 }, (err, page) => {
-      if(err || !page) return cb(items);
-      (function take(p){
-        items.push(...p.items);
-        if(p.hasNext()) p.next((e, n) => { if(e || !n) cb(items); else take(n); });
-        else cb(items);
-      })(page);
-    });
-  }
+  let wishTimer = null;
   function initAbly(){
-    if(typeof Ably === 'undefined') return;
+    if(typeof Ably === 'undefined' || typeof WunschSync === 'undefined') return;
     let ably;
     try{ ably = new Ably.Realtime({ key: ABLY_KEY }); }catch(e){ return; }
-    const channel = ably.channels.get(CHANNEL_NAME);
-    channel.subscribe('new-track', (msg) => { addTrack(msg.data); renderWishers(true); });
-    channel.attach((err) => {
-      if(err) return;
-      loadAllHistory(channel, (items) => {
-        items.forEach(item => { if(item.name === 'new-track') addTrack(item.data); });
-        renderWishers(true);
-      });
+    // Wünsche aus lokaler Kopie, letztem Stand und komplettem Verlauf (siehe wunsch-sync.js)
+    WunschSync(ably, CHANNEL_NAME, {
+      onEvent(name, data){
+        if(name !== 'new-track') return;
+        addTrack(data);
+        clearTimeout(wishTimer);
+        wishTimer = setTimeout(() => renderWishers(true), 150);
+      }
     });
   }
 

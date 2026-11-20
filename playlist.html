@@ -304,6 +304,7 @@
 </div>
 
 <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+<script src="wunsch-sync.js"></script>
 <script>
 (function(){
   const ACCESS_KEY = "bd2d143a-9fc3-420d-89df-101a7a3b0eff";
@@ -346,7 +347,7 @@
   let pinByName = {};
   let bonusGrants = []; // {id, nameLower, bonusPin, bonusCount, ts, usedBy: []}
   let unlockedGrantId = null;
-  let ably, channel;
+  let ably, sync;
   let isSubmitting = false;
 
   // --- Local persistence for "my wishes" (survives reload even if Ably history is short) ---
@@ -474,8 +475,17 @@
     mainScreen.classList.remove('hidden');
     loginError.textContent = '';
     loadMineFromStorage(currentName, currentPin).forEach(addTrackLocally);
+    healMine();
     updateWhoami();
     renderMine();
+  }
+
+  // Eigene Wünsche, die online fehlen, erneut veröffentlichen
+  function healMine(){
+    if(!sync || !sync.isReady || !currentName) return;
+    loadMineFromStorage(currentName, currentPin).forEach(t => {
+      if(t && t.id && !sync.has('new-track', t)) sync.publish('new-track', t);
+    });
   }
 
   function updateWhoami(){
@@ -548,9 +558,9 @@
     form.reset();
     wishPanel.style.display = 'block';
     againBtn.classList.add('hidden');
-    titleInput.closest('label').style.display = 'block';
+    form.querySelector('label[for="titleInput"]').style.display = 'block';
     titleInput.style.display = 'block';
-    artistInput.closest('label').style.display = 'block';
+    form.querySelector('label[for="artistInput"]').style.display = 'block';
     artistInput.style.display = 'block';
     sendBtn.style.display = 'block';
     sendBtn.disabled = false;
@@ -640,8 +650,8 @@
       }
 
       addTrackLocally(track);
-      if(channel){
-        channel.publish('new-track', track);
+      if(sync){
+        sync.publish('new-track', track);
         if(usedGrantId){
           const action = {
             type: 'use-bonus',
@@ -650,7 +660,7 @@
             ts: Date.now()
           };
           applyAdminAction(action);
-          channel.publish('admin-action', action);
+          sync.publish('admin-action', action);
         }
       }
 
@@ -661,9 +671,9 @@
         statusMsg.textContent = 'Wunsch eingetragen, Mail-Versand hat aber nicht geklappt.';
         statusMsg.className = 'status err';
       }
-      titleInput.closest('label').style.display = 'none';
+      form.querySelector('label[for="titleInput"]').style.display = 'none';
       titleInput.style.display = 'none';
-      artistInput.closest('label').style.display = 'none';
+      form.querySelector('label[for="artistInput"]').style.display = 'none';
       artistInput.style.display = 'none';
       sendBtn.style.display = 'none';
       againBtn.classList.remove('hidden');
@@ -681,35 +691,13 @@
     }catch(e){
       return;
     }
-    channel = ably.channels.get(CHANNEL_NAME);
-
-    channel.subscribe('new-track', (msg) => addTrackLocally(msg.data));
-    channel.subscribe('admin-action', (msg) => applyAdminAction(msg.data));
-
-    function loadHistory(){
-      channel.history((err, page) => {
-        if(err) return;
-        const historyTracks = [];
-        const historyActions = [];
-        const collect = (p) => {
-          p.items.forEach(item => {
-            if(item.name === 'new-track') historyTracks.push(item.data);
-            if(item.name === 'admin-action') historyActions.push(item.data);
-          });
-          if(p.hasNext()){
-            p.next((e, nextPage) => { if(!e) collect(nextPage); });
-          }
-        };
-        collect(page);
-        historyTracks.forEach(addTrackLocally);
-        historyActions.sort((a,b) => (a.ts||0) - (b.ts||0));
-        historyActions.forEach(applyAdminAction);
-      });
-    }
-
-    channel.attach((err) => {
-      if(err) return;
-      loadHistory();
+    // Wünsche + Aktionen aus lokaler Kopie, letztem Stand und komplettem Verlauf (siehe wunsch-sync.js)
+    sync = WunschSync(ably, CHANNEL_NAME, {
+      onEvent(name, data){
+        if(name === 'new-track') addTrackLocally(data);
+        else if(name === 'admin-action') applyAdminAction(data);
+      },
+      onReady: healMine
     });
   }
 
